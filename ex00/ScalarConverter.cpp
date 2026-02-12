@@ -201,6 +201,14 @@ static void printDouble(double value)
 	std::cout << std::fixed << std::setprecision(1) << value << std::endl;
 }
 
+static void printAllImpossible()
+{
+	std::cout << "char: impossible" << std::endl;
+	std::cout << "int: impossible" << std::endl;
+	std::cout << "float: impossible" << std::endl;
+	std::cout << "double: impossible" << std::endl;
+}
+
 static bool parseToDouble(const std::string &s, double &outValue)
 {
 	errno = 0;
@@ -236,10 +244,7 @@ void ScalarConverter::convert(const std::string &literal)
 
 	if (literal.empty())
 	{
-		std::cout << "char: impossible" << std::endl;
-		std::cout << "int: impossible" << std::endl;
-		std::cout << "float: impossible" << std::endl;
-		std::cout << "double: impossible" << std::endl;
+		printAllImpossible();
 		return;
 	}
 
@@ -265,10 +270,7 @@ void ScalarConverter::convert(const std::string &literal)
 		double parsed = 0.0;
 		if (!parseToDouble(literal, parsed))
 		{
-			std::cout << "char: impossible" << std::endl;
-			std::cout << "int: impossible" << std::endl;
-			std::cout << "float: impossible" << std::endl;
-			std::cout << "double: impossible" << std::endl;
+			printAllImpossible();
 			return;
 		}
 		value = parsed;
@@ -279,10 +281,7 @@ void ScalarConverter::convert(const std::string &literal)
 		double parsed = 0.0;
 		if (!parseToDouble(core, parsed))
 		{
-			std::cout << "char: impossible" << std::endl;
-			std::cout << "int: impossible" << std::endl;
-			std::cout << "float: impossible" << std::endl;
-			std::cout << "double: impossible" << std::endl;
+			printAllImpossible();
 			return;
 		}
 		value = parsed;
@@ -292,20 +291,14 @@ void ScalarConverter::convert(const std::string &literal)
 		double parsed = 0.0;
 		if (!parseToDouble(literal, parsed))
 		{
-			std::cout << "char: impossible" << std::endl;
-			std::cout << "int: impossible" << std::endl;
-			std::cout << "float: impossible" << std::endl;
-			std::cout << "double: impossible" << std::endl;
+			printAllImpossible();
 			return;
 		}
 		value = parsed;
 	}
 	else
 	{
-		std::cout << "char: impossible" << std::endl;
-		std::cout << "int: impossible" << std::endl;
-		std::cout << "float: impossible" << std::endl;
-		std::cout << "double: impossible" << std::endl;
+		printAllImpossible();
 		return;
 	}
 
