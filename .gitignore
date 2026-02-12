@@ -3,7 +3,7 @@
 *.d
 *.out
 
-ex00/exe
+ex00/convert
 ex01/exe
 ex02/exe
 ex03/exe
