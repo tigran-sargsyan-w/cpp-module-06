@@ -262,7 +262,7 @@ void ScalarConverter::convert(const std::string &literal)
 			value = std::numeric_limits<double>::quiet_NaN();
 		else if (literal == "-inf" || literal == "-inff")
 			value = -std::numeric_limits<double>::infinity();
-		else
+		else if (literal == "+inf" || literal == "+inff")
 			value = std::numeric_limits<double>::infinity();
 	}
 	else if (isIntLiteral(literal))
