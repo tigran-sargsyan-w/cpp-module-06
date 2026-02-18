@@ -229,6 +229,16 @@ static bool parseToDouble(const std::string &s, double &outValue)
 	return true;
 }
 
+static bool tryParseOrFail(const std::string &s, double &outValue)
+{
+	if (!parseToDouble(s, outValue))
+	{
+		printAllImpossible();
+		return false;
+	}
+	return true;
+}
+
 ScalarConverter::ScalarConverter() {}
 ScalarConverter::ScalarConverter(const ScalarConverter &other) { (void)other; }
 ScalarConverter &ScalarConverter::operator=(const ScalarConverter &other)
@@ -267,34 +277,19 @@ void ScalarConverter::convert(const std::string &literal)
 	}
 	else if (isIntLiteral(literal))
 	{
-		double parsed = 0.0;
-		if (!parseToDouble(literal, parsed))
-		{
-			printAllImpossible();
+		if (!tryParseOrFail(literal, value))
 			return;
-		}
-		value = parsed;
 	}
 	else if (isFloatLiteral(literal))
 	{
 		std::string core = literal.substr(0, literal.size() - 1);
-		double parsed = 0.0;
-		if (!parseToDouble(core, parsed))
-		{
-			printAllImpossible();
+		if (!tryParseOrFail(core, value))
 			return;
-		}
-		value = parsed;
 	}
 	else if (isDoubleLiteral(literal))
 	{
-		double parsed = 0.0;
-		if (!parseToDouble(literal, parsed))
-		{
-			printAllImpossible();
+		if (!tryParseOrFail(literal, value))
 			return;
-		}
-		value = parsed;
 	}
 	else
 	{
