@@ -17,7 +17,7 @@ int main(void)
 	dataInstance.id = 42;
 	dataInstance.score = 1337.5;
 
-	std::strncpy(dataInstance.name, "User", sizeof(dataInstance.name));
+	std::strncpy(dataInstance.name, "Username", sizeof(dataInstance.name));
 	dataInstance.name[sizeof(dataInstance.name) - 1] = '\0';
 
 	Data *originalPtr = &dataInstance;
