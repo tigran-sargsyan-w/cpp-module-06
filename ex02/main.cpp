@@ -3,11 +3,16 @@
 #include <ctime>
 #include <iostream>
 
+// Comment this code to disable typeid verification
 #include <typeinfo>
-
 static void verify(Base *basePtr)
 {
-	std::cout << "[verify] ";
+    if (basePtr == 0)
+	{
+		std::cout << "[TypeInfo] null pointer" << std::endl;
+		return ;
+	}
+	std::cout << "[TypeInfo] ";
 	if (typeid(*basePtr) == typeid(A))
 		std::cout << "typeid says: A" << std::endl;
 	else if (typeid(*basePtr) == typeid(B))
@@ -18,21 +23,29 @@ static void verify(Base *basePtr)
 		std::cout << "typeid says: Unknown" << std::endl;
 }
 
-int	main(void)
+static void runSingleTest()
 {
 	Base *basePtr;
 
-	std::srand(std::time(0));
-
 	basePtr = generate();
 
-	std::cout << "identify(pointer): ";
+	std::cout << "identify(pointer):   ";
 	identify(basePtr);
-
 	std::cout << "identify(reference): ";
 	identify(*basePtr);
-    verify(basePtr);
-    
+	verify(basePtr); // Comment this line to disable typeid verification
 	delete basePtr;
+}
+
+int	main(void)
+{
+	std::srand(std::time(0));
+
+    for (int i = 1; i <= 10; ++i)
+    {
+        std::cout << "===== Test #" << i << " =====" << std::endl;
+        runSingleTest();
+    }
+
 	return (0);
 }
