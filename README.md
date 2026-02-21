@@ -149,3 +149,200 @@ Use ASCII range:
 * else → print `'c'`
 
 This avoids encoding/terminal issues and matches typical subject expectations.
+
+
+# 🔥 Important Concept: Pointer Size & `uintptr_t`
+
+In **ex01 (Serialization)** we convert a pointer into an integer and back:
+
+```cpp
+uintptr_t raw = Serializer::serialize(ptr);
+Data *again = Serializer::deserialize(raw);
+```
+
+At first glance this looks trivial — but there is an important architectural detail behind it.
+
+---
+
+## 🧠 Why pointer size matters
+
+A pointer is just an address in memory.
+
+However, the **size of that address depends on the machine architecture**.
+
+### 🖥 32-bit systems
+
+On a 32-bit system:
+
+* Pointer size = **32 bits**
+* Address space = up to 2^32 bytes (4 GB)
+
+So a pointer can be safely stored inside a 32-bit integer type.
+
+---
+
+### 🖥 16-bit systems (very old architectures)
+
+On old 16-bit systems:
+
+* Pointer size = **16 bits**
+* Address space = up to 2^16 bytes (64 KB)
+
+Addresses were much smaller.
+
+---
+
+### 🖥 64-bit systems (modern standard)
+
+On modern 64-bit systems:
+
+* Pointer size = **64 bits**
+* Address space is vastly larger
+
+If you tried to store such a pointer inside a 32-bit integer,
+**you would lose the upper 32 bits of the address**, and the program would break.
+
+---
+
+### 🚀 Even newer / experimental architectures
+
+There are also experimental or specialized architectures
+that may use:
+
+* 128-bit addresses
+
+In such cases, pointer size would be **128 bits**.
+
+Hardcoding an integer type (like `unsigned long`) would become incorrect again.
+
+---
+
+## ✅ Why we use `uintptr_t`
+
+`uintptr_t` is defined in `<stdint.h>` (C++98 compatible).
+
+It is:
+
+> An unsigned integer type capable of storing a pointer value without loss.
+
+This means:
+
+* On 16-bit systems → `uintptr_t` is 16 bits
+* On 32-bit systems → `uintptr_t` is 32 bits
+* On 64-bit systems → `uintptr_t` is 64 bits
+* On 128-bit systems → it would match 128 bits
+
+The compiler chooses the correct size automatically for the target architecture.
+
+So instead of guessing pointer size,
+we rely on a **portable, architecture-safe type**.
+
+---
+
+## ⚠️ Important Distinction
+
+Using `uintptr_t`:
+
+✔ Guarantees we do not lose address bits
+✔ Makes the code portable
+✔ Makes the conversion reversible
+
+But it does NOT:
+
+❌ Extend object lifetime
+❌ Make a destroyed object valid again
+❌ Protect against dangling pointers
+
+`uintptr_t` safely stores an address.
+It does not guarantee that an object still exists at that address.
+
+---
+
+## 🔍 Why `reinterpret_cast` is required here
+
+In C++ there are different kinds of casts, each with a specific purpose.
+
+In this exercise we need to convert between:
+
+* a **pointer type** (`Data*`)
+* an **integer type** (`uintptr_t`)
+
+This is a **low-level reinterpretation** of the same bit-pattern.
+
+### Why not `static_cast`?
+
+`static_cast` is for safe, well-defined conversions (numeric conversions, up/down casts in inheritance, etc.).
+
+It is **not meant** for arbitrary pointer ↔ integer conversions.
+
+### Why `reinterpret_cast`?
+
+`reinterpret_cast` is the C++ tool designed for:
+
+* treating an address value as an integer
+* treating an integer as an address value
+
+So in ex01 we do:
+
+```cpp
+return reinterpret_cast<uintptr_t>(ptr);
+```
+
+and the reverse:
+
+```cpp
+return reinterpret_cast<Data *>(raw);
+```
+
+Important: this cast does not validate anything — it only reinterprets.
+
+---
+
+## ⚠️ Lifetime vs Address
+
+A core nuance of ex01 is understanding the difference between:
+
+* **An address** (a number)
+* **A live object** (valid memory with a valid lifetime)
+
+### ✅ The address can be stored safely
+
+`uintptr_t` can store the pointer value without losing bits.
+
+So the conversion is reversible:
+
+```cpp
+Data *again = Serializer::deserialize(Serializer::serialize(ptr));
+```
+
+### ❌ But the object may no longer exist
+
+If the original object’s lifetime ends, the address might still exist as a number,
+but dereferencing that address becomes **Undefined Behavior**.
+
+Typical UB situations:
+
+* stack object leaves scope → dangling pointer (stack-use-after-scope)
+* heap object is deleted → use-after-free
+
+This is why the exercise is subtle:
+
+> `uintptr_t` preserves the address correctly, but it cannot preserve the object.
+
+---
+
+## 🧩 Final Takeaway
+
+This exercise is not about complex serialization.
+It is about understanding:
+
+* What a pointer really is (an address)
+* That pointer size depends on architecture
+* Why portable code must not assume pointer width
+* Why `uintptr_t` exists
+* Why `reinterpret_cast` is the right tool here
+* Why object lifetime is still your responsibility
+
+> Address size is architecture-dependent.
+> `uintptr_t` adapts automatically.
+> Safety still depends on object lifetime management.
