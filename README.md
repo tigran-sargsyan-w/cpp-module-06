@@ -1,5 +1,196 @@
-# cpp-module-06
-This module is designed to help you understand the different types of casting in C++.
+# C++ Module 06 – C++ Casts 🔁🧠
+
+✅ **Status**: Completed – all mandatory exercises  
+🏫 **School**: 42 – C++ Modules (Module 06)  
+🏅 **Score**: (score)/100
+
+> *Scalar conversion, pointer serialization via `reinterpret_cast`, and runtime type identification via `dynamic_cast` (without `<typeinfo>`).*
+
+---
+
+## 📚 Table of Contents
+
+* [Description](#-description)
+* [Goals of the Module](#-goals-of-the-module)
+* [Exercises Overview](#-exercises-overview)
+
+  * [ex00 – ScalarConverter](#ex00--scalarconverter)
+  * [ex01 – Serializer](#ex01--serializer)
+  * [ex02 – Identify real type](#ex02--identify-real-type)
+* [Requirements](#-requirements)
+* [Build & Run](#-build--run)
+* [Repository Layout](#-repository-layout)
+* [ex00 Notes](#ex00-notes)
+
+  * [🔥 Important Edge Case: float rounding near INT limits](#-important-edge-case-float-rounding-near-int-limits)
+  * [🧩 Clarification: Why `char: Non displayable` for 128 and not always `impossible`](#-clarification-why-char-non-displayable-for-128-and-not-always-impossible)
+* [ex01 Notes](#ex01-notes)
+
+  * [🔥 Important Concept: Pointer Size & `uintptr_t`](#-important-concept-pointer-size--uintptr_t)
+  * [🔍 Why `reinterpret_cast` is required here](#-why-reinterpret_cast-is-required-here)
+  * [⚠️ Lifetime vs Address](#️-lifetime-vs-address)
+* [ex02 Notes](#ex02-notes)
+
+  * [🧠 Identify Real Type – Critical Nuances](#-identify-real-type--critical-nuances)
+* [🔍 Testing Tips](#-testing-tips)
+* [🧾 42 Notes](#-42-notes)
+
+---
+
+## 📝 Description
+
+This repository contains my solutions to **42’s C++ Module 06 (C++98)**.
+The module is a deep dive into **casting and type conversions**:
+
+* converting strings into scalars (`ex00`)
+* converting pointers into integers and back (`ex01`)
+* identifying the real dynamic type behind a base pointer/reference (`ex02`)
+
+A big part of this module is not only making it work, but also understanding **why a specific cast is the correct tool**.
+
+---
+
+## 🎯 Goals of the Module
+
+Concepts practiced:
+
+* Correct use of C++ casts: `static_cast`, `reinterpret_cast`, `dynamic_cast`
+* Handling pseudo literals (`nan`, `inf`, with and without `f`) in scalar conversions
+* Edge cases: overflow, precision loss, non-displayable characters
+* Why `uintptr_t` exists (portable “integer big enough to hold an address”)
+* RTTI-style detection with `dynamic_cast` without using `<typeinfo>`
+
+---
+
+## 📦 Exercises Overview
+
+### ex00 – ScalarConverter
+
+**Goal:** Implement a non-instantiable class `ScalarConverter` with:
+
+* `static void convert(std::string const& literal);`
+
+It detects the literal type, converts it to the “real” type first, then prints:
+
+* `char`
+* `int`
+* `float`
+* `double`
+
+Must handle pseudo literals:
+
+* `nan`, `+inf`, `-inf`
+* `nanf`, `+inff`, `-inff`
+
+---
+
+### ex01 – Serializer
+
+**Goal:** Implement a non-instantiable class `Serializer` with:
+
+* `static uintptr_t serialize(Data* ptr);`
+* `static Data* deserialize(uintptr_t raw);`
+
+Create a non-empty `Data` struct and verify that:
+
+* serializing and deserializing gives the **same address** back
+* pointer equality is preserved
+
+---
+
+### ex02 – Identify real type
+
+**Goal:** Create:
+
+* `Base` (only a public virtual destructor)
+* `A`, `B`, `C` inheriting publicly from `Base`
+
+Implement:
+
+* `Base* generate();` (randomly returns new `A/B/C`)
+* `void identify(Base* p);`
+* `void identify(Base& p);` (**no pointer usage inside this one**)
+
+Forbidden:
+
+* `<typeinfo>` / `typeid`
+
+---
+
+## 🛠 Requirements
+
+* **Compiler**: `c++`
+* **Flags**: `-Wall -Wextra -Werror -std=c++98`
+* **No external libraries** (no C++11+)
+* **No** `printf`, `malloc`, `free` (and friends)
+
+---
+
+## ▶️ Build & Run
+
+```bash
+git clone <this-repo-url>
+cd cpp-module-06
+```
+
+### ex00
+
+```bash
+cd ex00
+make
+./convert 0
+./convert 42.0f
+./convert nan
+```
+
+### ex01
+
+```bash
+cd ex01
+make
+./serializer
+```
+
+### ex02
+
+```bash
+cd ex02
+make
+./identify
+```
+
+---
+
+## 📂 Repository Layout
+
+```text
+cpp-module-06/
+├── ex00/
+│   ├── Makefile
+│   ├── ScalarConverter.hpp
+│   ├── ScalarConverter.cpp
+│   └── main.cpp
+│
+├── ex01/
+│   ├── Makefile
+│   ├── Serializer.hpp
+│   ├── Serializer.cpp
+│   ├── Data.hpp
+│   └── main.cpp
+│
+└── ex02/
+    ├── Makefile
+    ├── Base.hpp
+    ├── Base.cpp
+    ├── A.hpp / A.cpp
+    ├── B.hpp / B.cpp
+    ├── C.hpp / C.cpp
+    └── main.cpp
+```
+
+---
+
+# ex00 Notes
 
 ## 🔥 Important Edge Case: float rounding near INT limits
 
@@ -49,18 +240,18 @@ Negative values behave symmetrically.
 
 ---
 
-# 🧩 Clarification: Why `char: Non displayable` for 128 and not always `impossible`
+## 🧩 Clarification: Why `char: Non displayable` for 128 and not always `impossible`
 
-You noticed:
+You might notice:
 
 ```
 Input: 128.0
 char: Non displayable
 ```
 
-and you’re asking: should it be `impossible`? what about encodings?
+and wonder if it should be `impossible`.
 
-## 1) What a `char` really is in C++
+### 1) What a `char` really is in C++
 
 In C/C++, **`char` is just a 1-byte integer type**.
 
@@ -69,12 +260,12 @@ Two important properties:
 1. `sizeof(char) == 1` always.
 2. Whether `char` is **signed** or **unsigned** is **implementation-defined**.
 
-   * On some systems: `char` behaves like `signed char` (range typically `-128..127`)
-   * On others: it behaves like `unsigned char` (range typically `0..255`)
+* On some systems: `char` behaves like `signed char` (range typically `-128..127`)
+* On others: it behaves like `unsigned char` (range typically `0..255`)
 
 So when we ask: “can we convert to `char`?” — the answer depends on **which rule we choose**.
 
-## 2) The subject usually wants *ASCII-like* printing
+### 2) The subject usually wants *ASCII-like* printing
 
 Most 42 solutions treat the `char` output as:
 
@@ -85,145 +276,74 @@ Most 42 solutions treat the `char` output as:
 
 Under that rule:
 
-* `128` would be **`impossible`**.
+* `128` would be **`impossible`**
 
 ✅ This is the safest choice if your evaluator/tester expects strict ASCII.
 
-## 3) Why your current code prints `Non displayable` for 128
+### 3) Why some implementations print `Non displayable` for 128
 
-Your implementation checks the range using `unsigned char` limits (`0..255`).
-
-That means:
+If your implementation checks the range using `unsigned char` limits (`0..255`), then:
 
 * `128` is considered “representable as a byte” → so it’s **not impossible**
 * but it’s not in printable ASCII (`32..126`) → so you print **Non displayable**
 
-This is consistent with the logic:
+That logic is consistent from a *C++ type system* point of view.
 
-> “If it fits into a byte, conversion is possible; if it’s not printable, show Non displayable.”
-
-So from a *C++ type* point of view, this is not wrong.
-
-## 4) Where encodings come into play (and why it’s tricky)
+### 4) Where encodings come into play (and why it’s tricky)
 
 The reason `128` is a headache is not C++ casting — it’s **text encoding**:
 
 * ASCII defines only **0..127**.
 * Values **128..255** are **not ASCII**.
-* Historically there were many “extended ASCII” code pages:
+* Historically there were many “extended ASCII” code pages (Windows-1252, ISO-8859-1, KOI8-R, ...).
+* Modern terminals often use **UTF-8**, where a single byte `0x80` is not a valid standalone character.
 
-  * Windows-1252
-  * ISO-8859-1
-  * KOI8-R
-  * and many others
+So printing a raw byte with value 128 can:
 
-In those encodings, byte `0x80` (128) can mean different things.
+* show a weird symbol
+* show a replacement character
+* visually break output
 
-But today most terminals use **UTF-8**, where bytes `0x80..0xFF` may be part of multi-byte sequences.
+✅ That’s why the most evaluator-safe choice is usually: treat `char` output as ASCII-only.
 
-### Practical consequence
-
-If you print a single byte with value 128:
-
-* it may appear as a strange symbol
-* or as “replacement character”
-* or break the output visually
-
-That’s why many evaluators prefer the rule:
-
-✅ “Only ASCII 0..127 is considered meaningful for `char` output.”
-
-## 5) So… should 128 be `impossible` or `Non displayable`?
-
-Both interpretations can be defended, but for 42 **tests**:
-
-* **Most common expected behavior**: treat `char` output as ASCII → `128` is `impossible`.
-* Your current behavior: treat `char` as a byte (`unsigned char`) → `128` is `Non displayable`.
-
-### Recommended for maximum safety
-
-Use ASCII range:
+### Recommended rule for maximum safety
 
 * if value < 0 or value > 127 → `impossible`
 * else if value < 32 or value == 127 → `Non displayable`
 * else → print `'c'`
 
-This avoids encoding/terminal issues and matches typical subject expectations.
+---
 
+# ex01 Notes
 
-# 🔥 Important Concept: Pointer Size & `uintptr_t`
+## 🔥 Important Concept: Pointer Size & `uintptr_t`
 
 In **ex01 (Serialization)** we convert a pointer into an integer and back:
 
 ```cpp
 uintptr_t raw = Serializer::serialize(ptr);
-Data *again = Serializer::deserialize(raw);
+Data* again = Serializer::deserialize(raw);
 ```
 
 At first glance this looks trivial — but there is an important architectural detail behind it.
 
----
-
-## 🧠 Why pointer size matters
+### 🧠 Why pointer size matters
 
 A pointer is just an address in memory.
+But the **size of that address depends on the machine architecture**.
 
-However, the **size of that address depends on the machine architecture**.
+* **32-bit systems**: pointer size is 32 bits (4 GB address space)
+* **16-bit systems** (very old): pointer size is 16 bits (64 KB address space)
+* **64-bit systems** (modern standard): pointer size is 64 bits
+* **specialized / experimental** architectures may even use **128-bit** addressing
 
-### 🖥 32-bit systems
+Hardcoding a type like `unsigned long` is not portable: on some platforms it might be too small.
 
-On a 32-bit system:
+### ✅ Why we use `uintptr_t`
 
-* Pointer size = **32 bits**
-* Address space = up to 2^32 bytes (4 GB)
+`uintptr_t` (from `<stdint.h>`, C++98 compatible) is:
 
-So a pointer can be safely stored inside a 32-bit integer type.
-
----
-
-### 🖥 16-bit systems (very old architectures)
-
-On old 16-bit systems:
-
-* Pointer size = **16 bits**
-* Address space = up to 2^16 bytes (64 KB)
-
-Addresses were much smaller.
-
----
-
-### 🖥 64-bit systems (modern standard)
-
-On modern 64-bit systems:
-
-* Pointer size = **64 bits**
-* Address space is vastly larger
-
-If you tried to store such a pointer inside a 32-bit integer,
-**you would lose the upper 32 bits of the address**, and the program would break.
-
----
-
-### 🚀 Even newer / experimental architectures
-
-There are also experimental or specialized architectures
-that may use:
-
-* 128-bit addresses
-
-In such cases, pointer size would be **128 bits**.
-
-Hardcoding an integer type (like `unsigned long`) would become incorrect again.
-
----
-
-## ✅ Why we use `uintptr_t`
-
-`uintptr_t` is defined in `<stdint.h>` (C++98 compatible).
-
-It is:
-
-> An unsigned integer type capable of storing a pointer value without loss.
+> an unsigned integer type capable of storing a pointer value without loss.
 
 This means:
 
@@ -234,50 +354,43 @@ This means:
 
 The compiler chooses the correct size automatically for the target architecture.
 
-So instead of guessing pointer size,
-we rely on a **portable, architecture-safe type**.
+So instead of guessing pointer size, we rely on a **portable, architecture-safe type**.
 
----
-
-## ⚠️ Important Distinction
+### ⚠️ Important distinction
 
 Using `uintptr_t`:
 
-✔ Guarantees we do not lose address bits
-✔ Makes the code portable
-✔ Makes the conversion reversible
+* ✔ guarantees we do not lose address bits
+* ✔ makes the conversion reversible
+* ✔ keeps the code portable
 
-But it does NOT:
+But it does **not**:
 
-❌ Extend object lifetime
-❌ Make a destroyed object valid again
-❌ Protect against dangling pointers
+* ❌ extend object lifetime
+* ❌ make a destroyed object valid again
+* ❌ protect against dangling pointers
 
 `uintptr_t` safely stores an address.
 It does not guarantee that an object still exists at that address.
-
 ---
 
 ## 🔍 Why `reinterpret_cast` is required here
-
-In C++ there are different kinds of casts, each with a specific purpose.
 
 In this exercise we need to convert between:
 
 * a **pointer type** (`Data*`)
 * an **integer type** (`uintptr_t`)
 
-This is a **low-level reinterpretation** of the same bit-pattern.
+This is a low-level reinterpretation of the same bit pattern.
 
 ### Why not `static_cast`?
 
-`static_cast` is for safe, well-defined conversions (numeric conversions, up/down casts in inheritance, etc.).
-
-It is **not meant** for arbitrary pointer ↔ integer conversions.
+`static_cast` is for well-defined conversions like numeric conversions and safe up/down casts in inheritance.
+It’s **not meant** for arbitrary pointer ↔ integer conversions.
 
 ### Why `reinterpret_cast`?
 
-`reinterpret_cast` is the C++ tool designed for:
+`reinterpret_cast` is the cast designed for:
 
 * treating an address value as an integer
 * treating an integer as an address value
@@ -291,7 +404,7 @@ return reinterpret_cast<uintptr_t>(ptr);
 and the reverse:
 
 ```cpp
-return reinterpret_cast<Data *>(raw);
+return reinterpret_cast<Data*>(raw);
 ```
 
 Important: this cast does not validate anything — it only reinterprets.
@@ -302,59 +415,41 @@ Important: this cast does not validate anything — it only reinterprets.
 
 A core nuance of ex01 is understanding the difference between:
 
-* **An address** (a number)
+* **An address** (just a number)
 * **A live object** (valid memory with a valid lifetime)
 
 ### ✅ The address can be stored safely
 
 `uintptr_t` can store the pointer value without losing bits.
-
 So the conversion is reversible:
 
 ```cpp
-Data *again = Serializer::deserialize(Serializer::serialize(ptr));
+Data* again = Serializer::deserialize(Serializer::serialize(ptr));
 ```
 
 ### ❌ But the object may no longer exist
 
-If the original object’s lifetime ends, the address might still exist as a number,
-but dereferencing that address becomes **Undefined Behavior**.
+If the original object’s lifetime ends, the address still exists as a number,
+but dereferencing it becomes **Undefined Behavior**.
 
 Typical UB situations:
 
-* stack object leaves scope → dangling pointer (stack-use-after-scope)
+* stack object leaves scope → dangling pointer
 * heap object is deleted → use-after-free
-
-This is why the exercise is subtle:
 
 > `uintptr_t` preserves the address correctly, but it cannot preserve the object.
 
 ---
 
-## 🧩 Final Takeaway
+# ex02 Notes
 
-This exercise is not about complex serialization.
-It is about understanding:
+## 🧠 Identify Real Type – Critical Nuances
 
-* What a pointer really is (an address)
-* That pointer size depends on architecture
-* Why portable code must not assume pointer width
-* Why `uintptr_t` exists
-* Why `reinterpret_cast` is the right tool here
-* Why object lifetime is still your responsibility
-
-> Address size is architecture-dependent.
-> `uintptr_t` adapts automatically.
-> Safety still depends on object lifetime management.
-
-
-# 🧠 Identify Real Type (ex02) – Critical Nuances
-
-This exercise is about understanding **polymorphism**, **RTTI**, and the correct use of `dynamic_cast`.
+This exercise is about **polymorphism**, **RTTI behavior**, and correct use of `dynamic_cast`.
 
 ---
 
-## 🔥 Base MUST Be Polymorphic
+### 🔥 Base MUST Be Polymorphic
 
 ```cpp
 class Base
@@ -366,11 +461,10 @@ public:
 
 Why this is mandatory:
 
-• `dynamic_cast` works correctly **only with polymorphic types**
-• A class becomes polymorphic if it has at least one `virtual` function
-• Without `virtual`, `dynamic_cast` leads to **undefined behavior**
+* `dynamic_cast` works correctly **only with polymorphic types**
+* a class becomes polymorphic if it has at least one `virtual` function
 
-Additionally:
+Also, deleting through base pointer must be safe:
 
 ```cpp
 Base* ptr = new A();
@@ -379,18 +473,18 @@ delete ptr;
 
 Without a virtual destructor:
 
-❌ Only `Base` destructor runs
-❌ Derived destructor does NOT run
-❌ Leads to partial destruction (UB)
+* ❌ only `Base` destructor runs
+* ❌ derived destructor does not run
+* ❌ UB / partial destruction
 
 So the virtual destructor guarantees:
 
-✔ RTTI works
-✔ Proper destruction through base pointer
+* ✔ RTTI works
+* ✔ proper destruction through base pointer
 
 ---
 
-## 🔄 Implicit Upcasting in `generate()`
+### 🔄 Implicit Upcasting in `generate()`
 
 ```cpp
 return new A();
@@ -398,11 +492,9 @@ return new A();
 
 The function returns `Base*`, so this triggers an **implicit upcast**:
 
-```
-A* → Base*
-```
+* `A* → Base*`
 
-Conceptually equivalent to:
+Equivalent to:
 
 ```cpp
 A* ptrA = new A();
@@ -412,77 +504,58 @@ return ptrBase;
 
 This is safe because inheritance is `public`.
 
-### ⚠️ Not Object Slicing
-
-There is NO slicing because we use pointers.
-The object remains a full `A`.
+✅ Not slicing: there is no slicing because we use pointers.
 
 ---
 
-## ⚠️ Pointer Adjustment (Subtle but Important)
+### ⚠️ Pointer Adjustment (Subtle but Important)
 
-In simple single inheritance:
-
-```
-A* == Base*
-```
-
+In simple single inheritance, `A*` and `Base*` often have the same address.
 But with multiple inheritance:
 
-• `Base*` may require an internal offset
-• The compiler automatically adjusts the pointer
+* `Base*` may require an internal offset
+* the compiler automatically adjusts the pointer
 
-Upcasting may internally modify the address.
+Upcasting may internally modify the address to point to the correct base subobject.
 
 ---
 
-## 🔎 `dynamic_cast` Behavior
+### 🔎 `dynamic_cast` behavior
 
-### Pointer Version
+**Pointer version**:
 
 ```cpp
 dynamic_cast<A*>(p);
 ```
 
-If cast fails:
+* ✔ on failure: returns `NULL`
+* ✔ on success: returns valid pointer
 
-✔ returns `NULL`
-
-If cast succeeds:
-
-✔ returns valid pointer
-
----
-
-### Reference Version
+**Reference version**:
 
 ```cpp
 dynamic_cast<A&>(p);
 ```
 
-If cast fails:
+* ❗ on failure: throws `std::bad_cast`
 
-❗ throws `std::bad_cast`
+So the reference-based identify must use `try/catch`.
 
-So we must use `try/catch`.
+**Critical difference**:
 
----
-
-## ⚖️ Critical Difference
-
-| Cast Type          | On Failure       |
+| Cast form          | On failure       |
 | ------------------ | ---------------- |
 | `dynamic_cast<T*>` | returns `NULL`   |
 | `dynamic_cast<T&>` | throws exception |
 
 Reason:
 
-• A pointer may legally be `NULL`
-• A reference must always refer to a valid object
+* a pointer may legally be `NULL`
+* a reference must always refer to a valid object
 
 ---
 
-## 🚫 Why `static_cast` Is Wrong Here
+### 🚫 Why `static_cast` is wrong here (downcasting)
 
 ```cpp
 A* a = static_cast<A*>(basePtr);
@@ -490,27 +563,13 @@ A* a = static_cast<A*>(basePtr);
 
 If `basePtr` actually points to `B`:
 
-❌ Undefined Behavior
-❌ No runtime check is performed
+* ❌ Undefined Behavior
+* ❌ no runtime check is performed
 
 Only `dynamic_cast` verifies the real runtime type.
 
 ---
-
-## 🎯 What This Exercise Really Teaches
-
-```cpp
-Base* ptr = new A();
-```
-
-Static type → `Base*`
-Dynamic type → `A`
-
-Only `dynamic_cast` can safely detect the dynamic type at runtime.
-
----
-
-## 🔬 What Happens "Under the Hood" (Upcast Internals)
+### 🔬 What Happens "Under the Hood" (Upcast Internals)
 
 When we write:
 
@@ -573,49 +632,76 @@ UB can happen if:
 
 This exercise forces correct design to avoid UB.
 
----
+### 🛠 Viewing what the compiler generates (optional curiosity)
 
-## 🛠 Viewing What the Compiler Generates (objdump / assembly)
-
-To inspect what really happens during upcasting or `dynamic_cast`:
-
-Compile without optimizations:
+To see what happens under the hood, compile without optimizations:
 
 ```bash
 c++ -std=c++98 -O0 -g3 *.cpp -o identify
 ```
 
-Then inspect assembly:
+Then inspect:
 
 ```bash
 objdump -d -C identify | less
 ```
 
-• `-C` demangles C++ names
-• `-O0` prevents aggressive optimization
+* `-C` demangles C++ names
+* `-O0` prevents optimizations from hiding steps
 
-You can also generate `.s` directly:
+You can also generate assembly directly:
 
 ```bash
-c++ -std=c++98 -O0 -S Identify.cpp -o Identify.s
+c++ -std=c++98 -O0 -S main.cpp -o main.s
 ```
-
-Note:
-With optimizations enabled (`-O2`), the compiler may remove intermediate steps and merge operations.
 
 ---
 
-## 🧩 Final Takeaway
+## 🔍 Testing Tips
 
-This exercise demonstrates:
+### ex00
 
-• Why polymorphic base classes need virtual destructors
-• How implicit upcasting works internally
-• That upcasting may adjust pointer addresses
-• Why pointer and reference `dynamic_cast` behave differently
-• Why `static_cast` can lead to UB in downcasting
-• How to inspect compiler output to understand behavior
+```bash
+./convert a
+./convert 'a'
+./convert 0
+./convert 127
+./convert 128
+./convert -1
+./convert 2147483647
+./convert -2147483649
+./convert nan
+./convert +inf
+./convert -inff
+```
 
-> Polymorphism hides the real type.
-> RTTI allows us to recover it safely.
-> `dynamic_cast` enforces runtime safety.
+Things to verify:
+
+* pseudo-literals output
+* overflow handling (`impossible`)
+* float rounding near `INT_MAX`
+* consistent `char` rules (ASCII safety)
+
+### ex01
+
+* check pointer equality after round-trip
+* print the `uintptr_t` value and compare with the original address formatting
+* ensure `Data` is non-empty
+
+### ex02
+
+* call `generate()` multiple times
+* test both `identify(ptr)` and `identify(ref)`
+* verify no `<typeinfo>` usage
+
+---
+
+## 🧾 42 Notes
+
+* C++ modules do not use Norminette, but clean and readable code still matters.
+* During evaluation you’ll likely be asked to justify why you used a specific cast.
+* The “real learning” here is understanding precision, undefined behavior, and runtime type checks — not just passing the tests.
+
+---
+
+If you’re a 42 student working on the same module: feel free to explore the code, get inspired, but **write your own implementation** — that’s where the learning happens. 🚀
