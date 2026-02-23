@@ -346,3 +346,276 @@ It is about understanding:
 > Address size is architecture-dependent.
 > `uintptr_t` adapts automatically.
 > Safety still depends on object lifetime management.
+
+
+# 🧠 Identify Real Type (ex02) – Critical Nuances
+
+This exercise is about understanding **polymorphism**, **RTTI**, and the correct use of `dynamic_cast`.
+
+---
+
+## 🔥 Base MUST Be Polymorphic
+
+```cpp
+class Base
+{
+public:
+    virtual ~Base();
+};
+```
+
+Why this is mandatory:
+
+• `dynamic_cast` works correctly **only with polymorphic types**
+• A class becomes polymorphic if it has at least one `virtual` function
+• Without `virtual`, `dynamic_cast` leads to **undefined behavior**
+
+Additionally:
+
+```cpp
+Base* ptr = new A();
+delete ptr;
+```
+
+Without a virtual destructor:
+
+❌ Only `Base` destructor runs
+❌ Derived destructor does NOT run
+❌ Leads to partial destruction (UB)
+
+So the virtual destructor guarantees:
+
+✔ RTTI works
+✔ Proper destruction through base pointer
+
+---
+
+## 🔄 Implicit Upcasting in `generate()`
+
+```cpp
+return new A();
+```
+
+The function returns `Base*`, so this triggers an **implicit upcast**:
+
+```
+A* → Base*
+```
+
+Conceptually equivalent to:
+
+```cpp
+A* ptrA = new A();
+Base* ptrBase = ptrA;
+return ptrBase;
+```
+
+This is safe because inheritance is `public`.
+
+### ⚠️ Not Object Slicing
+
+There is NO slicing because we use pointers.
+The object remains a full `A`.
+
+---
+
+## ⚠️ Pointer Adjustment (Subtle but Important)
+
+In simple single inheritance:
+
+```
+A* == Base*
+```
+
+But with multiple inheritance:
+
+• `Base*` may require an internal offset
+• The compiler automatically adjusts the pointer
+
+Upcasting may internally modify the address.
+
+---
+
+## 🔎 `dynamic_cast` Behavior
+
+### Pointer Version
+
+```cpp
+dynamic_cast<A*>(p);
+```
+
+If cast fails:
+
+✔ returns `NULL`
+
+If cast succeeds:
+
+✔ returns valid pointer
+
+---
+
+### Reference Version
+
+```cpp
+dynamic_cast<A&>(p);
+```
+
+If cast fails:
+
+❗ throws `std::bad_cast`
+
+So we must use `try/catch`.
+
+---
+
+## ⚖️ Critical Difference
+
+| Cast Type          | On Failure       |
+| ------------------ | ---------------- |
+| `dynamic_cast<T*>` | returns `NULL`   |
+| `dynamic_cast<T&>` | throws exception |
+
+Reason:
+
+• A pointer may legally be `NULL`
+• A reference must always refer to a valid object
+
+---
+
+## 🚫 Why `static_cast` Is Wrong Here
+
+```cpp
+A* a = static_cast<A*>(basePtr);
+```
+
+If `basePtr` actually points to `B`:
+
+❌ Undefined Behavior
+❌ No runtime check is performed
+
+Only `dynamic_cast` verifies the real runtime type.
+
+---
+
+## 🎯 What This Exercise Really Teaches
+
+```cpp
+Base* ptr = new A();
+```
+
+Static type → `Base*`
+Dynamic type → `A`
+
+Only `dynamic_cast` can safely detect the dynamic type at runtime.
+
+---
+
+## 🔬 What Happens "Under the Hood" (Upcast Internals)
+
+When we write:
+
+```cpp
+return new A();
+```
+
+but the function returns `Base*`, an **implicit upcast** happens:
+
+```
+A* → Base*
+```
+
+This is NOT packaging or wrapping.
+
+It is a compile-time conversion allowed because of `public` inheritance.
+
+Conceptually equivalent to:
+
+```cpp
+A* ptrA = new A();
+Base* ptrBase = ptrA;
+return ptrBase;
+```
+
+### ⚠️ Important detail
+
+In simple single inheritance the addresses are usually identical.
+
+With multiple inheritance, the compiler may apply an **internal pointer offset adjustment** so that the `Base*` points to the correct base subobject.
+
+No object slicing occurs because we are using pointers.
+
+---
+
+## 🚫 Why Not `static_cast`?
+
+```cpp
+A* a = static_cast<A*>(basePtr);
+```
+
+If `basePtr` actually points to `B`, this results in:
+
+❌ Undefined Behavior
+❌ No runtime type verification
+
+`static_cast` performs no dynamic check.
+
+Only `dynamic_cast` verifies the real runtime type using RTTI.
+
+---
+
+## ⚠️ Where Undefined Behavior Appears
+
+UB can happen if:
+
+• You downcast using `static_cast` incorrectly
+• Base is not polymorphic (no virtual function)
+• You delete through a base pointer without virtual destructor
+
+This exercise forces correct design to avoid UB.
+
+---
+
+## 🛠 Viewing What the Compiler Generates (objdump / assembly)
+
+To inspect what really happens during upcasting or `dynamic_cast`:
+
+Compile without optimizations:
+
+```bash
+c++ -std=c++98 -O0 -g3 *.cpp -o identify
+```
+
+Then inspect assembly:
+
+```bash
+objdump -d -C identify | less
+```
+
+• `-C` demangles C++ names
+• `-O0` prevents aggressive optimization
+
+You can also generate `.s` directly:
+
+```bash
+c++ -std=c++98 -O0 -S Identify.cpp -o Identify.s
+```
+
+Note:
+With optimizations enabled (`-O2`), the compiler may remove intermediate steps and merge operations.
+
+---
+
+## 🧩 Final Takeaway
+
+This exercise demonstrates:
+
+• Why polymorphic base classes need virtual destructors
+• How implicit upcasting works internally
+• That upcasting may adjust pointer addresses
+• Why pointer and reference `dynamic_cast` behave differently
+• Why `static_cast` can lead to UB in downcasting
+• How to inspect compiler output to understand behavior
+
+> Polymorphism hides the real type.
+> RTTI allows us to recover it safely.
+> `dynamic_cast` enforces runtime safety.
