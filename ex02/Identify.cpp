@@ -37,10 +37,7 @@ void	identify(Base &p)
 		std::cout << "A" << std::endl;
 		return ;
 	}
-	catch (...)
-	{
-	}
-
+	catch (...) {}
 	try
 	{
 		B &refB = dynamic_cast<B &>(p);
@@ -48,10 +45,7 @@ void	identify(Base &p)
 		std::cout << "B" << std::endl;
 		return ;
 	}
-	catch (...)
-	{
-	}
-
+	catch (...) {}
 	try
 	{
 		C &refC = dynamic_cast<C &>(p);
@@ -59,7 +53,5 @@ void	identify(Base &p)
 		std::cout << "C" << std::endl;
 		return ;
 	}
-	catch (...)
-	{
-	}
+	catch (...) {}
 }
