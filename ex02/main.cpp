@@ -4,25 +4,33 @@
 #include <iostream>
 
 // Comment this code to disable typeid verification
-#include <typeinfo>
-static void verify(Base *basePtr)
-{
-    if (basePtr == 0)
-	{
-		std::cout << "[TypeInfo] null pointer" << std::endl;
-		return ;
-	}
-	std::cout << "[TypeInfo] ";
-	if (typeid(*basePtr) == typeid(A))
-		std::cout << "typeid says: A" << std::endl;
-	else if (typeid(*basePtr) == typeid(B))
-		std::cout << "typeid says: B" << std::endl;
-	else if (typeid(*basePtr) == typeid(C))
-		std::cout << "typeid says: C" << std::endl;
-	else
-		std::cout << "typeid says: Unknown" << std::endl;
-}
+// #include <typeinfo>
+// /**
+//  * @brief Verifies runtime type using typeid.
+//  * @param basePtr - pointer to base object.
+//  * @return nothing.
+//  */
+// static void verify(Base *basePtr)
+// {
+//     if (basePtr == 0)
+// 	{
+// 		std::cout << "[TypeInfo] null pointer" << std::endl;
+// 		return ;
+// 	}
+// 	std::cout << "[TypeInfo] ";
+// 	if (typeid(*basePtr) == typeid(A))
+// 		std::cout << "typeid says: A" << std::endl;
+// 	else if (typeid(*basePtr) == typeid(B))
+// 		std::cout << "typeid says: B" << std::endl;
+// 	else if (typeid(*basePtr) == typeid(C))
+// 		std::cout << "typeid says: C" << std::endl;
+// 	else
+// 		std::cout << "typeid says: Unknown" << std::endl;
+// }
 
+/**
+ * @brief Runs one identification test cycle.
+ */
 static void runSingleTest()
 {
 	Base *basePtr;
@@ -33,10 +41,14 @@ static void runSingleTest()
 	identify(basePtr);
 	std::cout << "identify(reference): ";
 	identify(*basePtr);
-	verify(basePtr); // Comment this line to disable typeid verification
+	// verify(basePtr); // Comment this line to disable typeid verification
 	delete basePtr;
 }
 
+/**
+ * @brief Entry point for RTTI identification tests.
+ * @return process exit code.
+ */
 int	main(void)
 {
 	std::srand(std::time(0));
