@@ -3,6 +3,10 @@
 #include <ctime>
 #include <iostream>
 
+/**
+ * @brief Creates a random derived instance of Base.
+ * @return pointer to A, B, or C.
+ */
 Base	*generate(void)
 {
 	int randomValue;
@@ -15,6 +19,10 @@ Base	*generate(void)
 	return (new C());
 }
 
+/**
+ * @brief Identifies dynamic type from pointer.
+ * @param p - pointer to base object.
+ */
 void	identify(Base *p)
 {
 	if (p == 0)
@@ -28,6 +36,10 @@ void	identify(Base *p)
 		std::cout << "C" << std::endl;
 }
 
+/**
+ * @brief Identifies dynamic type from reference.
+ * @param p - reference to base object.
+ */
 void	identify(Base &p)
 {
 	try
