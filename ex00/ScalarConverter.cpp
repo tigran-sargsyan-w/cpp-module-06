@@ -144,7 +144,6 @@ static bool isDoubleLiteral(const std::string &s)
 /**
  * @brief Prints char conversion result.
  * @param value - numeric value to convert.
- * @return nothing.
  */
 static void printChar(double value)
 {
@@ -174,7 +173,6 @@ static void printChar(double value)
 /**
  * @brief Prints int conversion result.
  * @param value - numeric value to convert.
- * @return nothing.
  */
 static void printInt(double value)
 {
@@ -196,7 +194,6 @@ static void printInt(double value)
 /**
  * @brief Prints float conversion result.
  * @param value - numeric value to convert.
- * @return nothing.
  */
 static void printFloat(double value)
 {
@@ -229,7 +226,6 @@ static void printFloat(double value)
 /**
  * @brief Prints double conversion result.
  * @param value - numeric value to convert.
- * @return nothing.
  */
 static void printDouble(double value)
 {
@@ -252,7 +248,6 @@ static void printDouble(double value)
 
 /**
  * @brief Prints impossible conversion for all scalar types.
- * @return nothing.
  */
 static void printAllImpossible()
 {
@@ -334,7 +329,6 @@ ScalarConverter::~ScalarConverter() {}
 /**
  * @brief Converts a literal and prints all scalar representations.
  * @param literal - input literal string.
- * @return nothing.
  */
 void ScalarConverter::convert(const std::string &literal)
 {
