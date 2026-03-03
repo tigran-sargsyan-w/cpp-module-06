@@ -2,6 +2,10 @@
 #include <cstring>
 #include "Serializer.hpp"
 
+/**
+ * @brief Prints Data struct fields.
+ * @param ptr - pointer to Data instance.
+ */
 static void printData(const Data *ptr)
 {
 	std::cout << "Data address: " << ptr << "\n";
@@ -10,6 +14,10 @@ static void printData(const Data *ptr)
 	std::cout << "score: " << ptr->score << "\n";
 }
 
+/**
+ * @brief Entry point for serialization demo.
+ * @return process exit code.
+ */
 int main(void)
 {
 	Data dataInstance;
