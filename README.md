@@ -2,7 +2,7 @@
 
 ✅ **Status**: Completed – all mandatory exercises  
 🏫 **School**: 42 – C++ Modules (Module 06)  
-🏅 **Score**: (score)/100
+🏅 **Score**: 90/100 (One of the reviewers did not agree with the scalar converter solution🤔)
 
 > *Scalar conversion, pointer serialization via `reinterpret_cast`, and runtime type identification via `dynamic_cast` (without `<typeinfo>`).*
 
