@@ -1,6 +1,6 @@
 # C++ Module 06 – C++ Casts 🔁🧠
 
-✅ **Status**: Completed – all mandatory exercises  
+✅ **Status**: Completed – all exercises  
 🏫 **School**: 42 – C++ Modules (Module 06)  
 🏅 **Score**: 90/100 (One of the reviewers did not agree with the scalar converter solution🤔)
 
